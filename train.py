@@ -19,6 +19,7 @@ from utils.lr_scheduler import LR_Scheduler
 from utils.saver import Saver
 from utils.summaries import TensorboardSummary
 from utils.metrics import Evaluator
+from mypath import Path
 
 class Trainer(object):
     def __init__(self, args):
@@ -57,7 +58,7 @@ class Trainer(object):
             if os.path.isfile(classes_weights_path):
                 weight = np.load(classes_weights_path)
             else:
-                weight = calculate_weigths_labels(args.dataset, self.train_loader, self.nclass)
+                weight = calculate_weigths_labels(args.dataset, self.train_loader, self.num_classes)
             weight = torch.from_numpy(weight.astype(np.float32))
         else:
             weight = None
@@ -74,7 +75,7 @@ class Trainer(object):
             self.model = self.model.cuda()
 
         # Resuming checkpoint
-        self.best_pred = self.saver.get_previous_best()
+        self.best_pred = 0.0
         if args.resume:
             if not os.path.isfile(args.resume):
                 raise RuntimeError("no checkpoint found at '{}'" .format(args.resume))
@@ -187,11 +188,11 @@ class Trainer(object):
 
         transform = transforms.Compose([
             transforms.ToTensor(), 
-            transforms.Normalize((0.190, 0.235, 0.222, 0.527), (0.127, 0.122, 0.119, 0.199))
+            transforms.Normalize((0.190, 0.235, 0.222), (0.127, 0.122, 0.119))
         ])
         test_image_names = os.listdir(args.test_dir)
         for i, test_image_name in enumerate(tqdm(test_image_names)):
-            test_image = Image.open(os.path.join(args.test_dir, test_image_name))
+            test_image = Image.open(os.path.join(args.test_dir, test_image_name)).convert('RGB')
             self.summary_writer.add_image('test/ground_truth', torch.tensor(np.asarray(test_image)), global_step=i, dataformats='HWC') 
             test_image = transform(test_image)
             

@@ -59,14 +59,14 @@ class SuichangSegmentation(Dataset):
 
 
     def _make_img_gt_point_pair(self, index):
-        _img = Image.open(self.images[index])
+        _img = Image.open(self.images[index]).convert('RGB')
         _target = Image.open(self.segs[index])
 
         return _img, _target
 
     def transform_tr(self, sample):
         composed_transforms = transforms.Compose([
-            tr.Normalize((0.190, 0.235, 0.222, 0.527), (0.127, 0.122, 0.119, 0.199)),
+            tr.Normalize((0.190, 0.235, 0.222), (0.127, 0.122, 0.119)),
             tr.ToTensor()])
 
         return composed_transforms(sample)
@@ -74,13 +74,13 @@ class SuichangSegmentation(Dataset):
     def transform_val(self, sample):
 
         composed_transforms = transforms.Compose([
-            tr.Normalize((0.190, 0.235, 0.222, 0.527), (0.127, 0.122, 0.119, 0.199)),
+            tr.Normalize((0.190, 0.235, 0.222), (0.127, 0.122, 0.119)),
             tr.ToTensor()])
 
     def transform_test(self, image):
         composed_transforms = transforms.Compose([
             transforms.ToTensor(),
-            transforms.Normalize((0.190, 0.235, 0.222, 0.527), (0.127, 0.122, 0.119, 0.199))
+            transforms.Normalize((0.190, 0.235, 0.222), (0.127, 0.122, 0.119))
             ])
         return composed_transforms(image)
 
